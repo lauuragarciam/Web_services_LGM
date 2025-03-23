@@ -1,0 +1,65 @@
+SOAP Intermediary Documentation – PaymentIntermediaryServlet
+
+This servlet implements a SOAP intermediary for the `processPayment` operation of my PayService web service deployed at http://127.0.0.1:8002/PayService. It processes incoming SOAP requests, modifies them based on a custom header, and returns a modified SOAP response.
+
+Workflow Description:
+
+1. Receiving Request from Client (SoapUI):
+   - The servlet accepts incoming POST requests containing a SOAP message.
+   - It extracts the original message using MessageFactory and reads the input stream.
+
+2. Processing the Custom Header (<discount>):
+   - The SOAP header is checked for a custom element:
+     <discount value="0.15" xmlns="http://tweaks.com/"/>
+   - If found, the value attribute is parsed as a decimal discount factor (e.g., 0.15 for 15%).
+
+3. Modifying the SOAP Body (Applying the Discount):
+   - The SOAP body is examined for the processPayment operation.
+   - Inside the operation, it locates the amount parameter (arg1).
+   - The amount is multiplied by (1 - discountFactor) to apply the discount.
+   - For example, if the original amount was 100 and the discount was 0.15, it becomes 85.0.
+
+4. Forwarding the Modified Request to the Real Service:
+   - The modified message is sent to the original web service (http://127.0.0.1:8002/PayService) using SOAPConnection.
+
+5. Adding a Response Header:
+   - A new header is inserted into the response before sending it back to the client:
+     <discountApplied xmlns="http://tweaks.com/">15% discount applied</discountApplied>
+   - This confirms to the client that a discount was processed and shows the percentage.
+
+6. Returning the Response to the Client:
+   - The final SOAP message (including the original service response + custom header) is written to the HTTP response and sent back to the client.
+
+
+Example:
+
+Input: 
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:pay="http://payService/">
+   <soapenv:Header>
+      <discount value="0.15" xmlns="http://tweaks.com/"/>
+   </soapenv:Header>
+   <soapenv:Body>
+      <pay:processPayment>
+         <!--Optional:-->
+         <arg0>Alice</arg0>
+         <arg1>20</arg1>
+      </pay:processPayment>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+Response:
+
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Header>
+      <discountApplied xmlns="http://tweaks.com/">15% discount applied</discountApplied>
+   </S:Header>
+   <S:Body>
+      <ns2:processPaymentResponse xmlns:ns2="http://payService/">
+         <return>Payment successful. Alice paid $17.0. Remaining balance: $33.0</return>
+      </ns2:processPaymentResponse>
+   </S:Body>
+</S:Envelope>
+
+
