@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="RestaurantService"
+             targetNamespace="http://restaurant/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://restaurant/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xsd:schema targetNamespace="http://restaurant/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      
+      <xsd:element name="getMenu" type="xsd:string"/>
+      <xsd:element name="getMenuResponse" type="xsd:string"/>
+      
+      <xsd:element name="placeOrder">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="dish" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="placeOrderResponse" type="xsd:string"/>
+    </xsd:schema>
+  </types>
+
+  <message name="getMenuRequest">
+    <part name="parameters" element="tns:getMenu"/>
+  </message>
+  <message name="getMenuResponse">
+    <part name="parameters" element="tns:getMenuResponse"/>
+  </message>
+
+  <message name="placeOrderRequest">
+    <part name="parameters" element="tns:placeOrder"/>
+  </message>
+  <message name="placeOrderResponse">
+    <part name="parameters" element="tns:placeOrderResponse"/>
+  </message>
+
+  <portType name="RestaurantService">
+    <operation name="getMenu">
+      <input message="tns:getMenuRequest"/>
+      <output message="tns:getMenuResponse"/>
+    </operation>
+    <operation name="placeOrder">
+      <input message="tns:placeOrderRequest"/>
+      <output message="tns:placeOrderResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="RestaurantServiceBinding" type="tns:RestaurantService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="getMenu">
+      <soap:operation soapAction=""/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+    <operation name="placeOrder">
+      <soap:operation soapAction=""/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+
+  <service name="RestaurantServiceImplService">
+    <port name="RestaurantServiceImplPort" binding="tns:RestaurantServiceBinding">
+      <soap:address location="http://localhost:8003/RestaurantService"/>
+    </port>
+  </service>
+
+</definitions>
