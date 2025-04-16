@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: Restaurant Menu API
+  version: 1.0.0
+  description: REST API to manage a restaurant's menu
+
+servers:
+  - url: http://localhost:8080/prRestauranteRest/rest
+
+paths:
+  /restaurant/menu:
+    get:
+      summary: Retrieve the full menu
+      responses:
+        '200':
+          description: List of dishes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+
+    post:
+      summary: Add a new dish to the menu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Dish'
+      responses:
+        '201':
+          description: Dish successfully added
+        '409':
+          description: Dish already exists
+
+  /restaurant/menu/{name}:
+    get:
+      summary: Get a specific dish by name
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dish found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Dish'
+        '404':
+          description: Dish not found
+
+    put:
+      summary: Update an existing dish
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dish'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Dish'
+      responses:
+        '204':
+          description: Dish successfully updated
+        '404':
+          description: Dish not found
+
+    delete:
+      summary: Delete a dish from the menu
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Dish successfully deleted
+        '404':
+          description: Dish not found
+
+components:
+  schemas:
+    Dish:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+          format: float
