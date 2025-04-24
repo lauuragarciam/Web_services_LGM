@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process name="CustomOrderProcess"
+         targetNamespace="http://example.com/bpel/CustomOrderProcess"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://example.com/bpel/CustomOrderProcess"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+         xmlns:ps="http://payService/"
+         xmlns:rs="http://restaurant/"
+         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+         xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+         xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+
+    <import location="CustomOrderProcess.wsdl" namespace="http://example.com/bpel/CustomOrderProcess" importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="wsdl/PayService.wsdl" namespace="http://payService/" importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="wsdl/RestaurantService.wsdl" namespace="http://restaurant/" importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="client" partnerLinkType="tns:ClientLinkType" myRole="processRole"/>
+        <partnerLink name="payService" partnerLinkType="tns:PayServiceLinkType" partnerRole="payRole"/>
+        <partnerLink name="restaurantService" partnerLinkType="tns:RestaurantServiceLinkType" partnerRole="restaurantRole"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="input" messageType="tns:OrderInputMessage"/>
+        <variable name="output" messageType="tns:OrderOutputMessage"/>
+        <variable name="payRequest" messageType="ps:processPayment"/>
+        <variable name="payResponse" messageType="ps:processPaymentResponse"/>
+        <variable name="orderRequest" messageType="rs:placeOrder"/>
+        <variable name="orderResponse" messageType="rs:placeOrderResponse"/>
+        <variable name="menuResponse" messageType="rs:getMenuResponse"/>
+        <variable name="emptyRequest" messageType="rs:getMenu"/>
+        <variable name="priceString" type="xsd:string"/>
+    </variables>
+
+    <sequence>
+        <receive partnerLink="client" portType="tns:CustomOrderPortType" operation="processOrder"
+                 variable="input" createInstance="yes"/>
+
+        <assign name="initEmptyRequest">
+            <copy>
+                <from>
+                    <literal>
+                        <rs:getMenu xmlns:rs="http://restaurant/"/>
+                    </literal>
+                </from>
+                <to variable="emptyRequest" part="parameters"/>
+            </copy>
+        </assign>
+
+        <invoke name="getMenu"
+                partnerLink="restaurantService"
+                portType="rs:RestaurantService"
+                operation="getMenu"
+                inputVariable="emptyRequest"
+                outputVariable="menuResponse"/>
+
+        <flow name="parallelExecution">
+            <sequence name="paymentSequence">
+
+                <assign name="preparePayRequest">
+                    <copy>
+                        <from variable="input" part="parameters" query="/tns:OrderInput/tns:customer"/>
+                        <to variable="payRequest" part="parameters" query="/ps:processPayment/ps:customer"/>
+                    </copy>
+                </assign>
+
+                <if name="priceCheckTiramisu">
+                    <condition>$input.parameters/tns:dish = 'Tiramisu'</condition>
+                    <assign name="setPriceTiramisu">
+                        <copy>
+                            <from><literal>4.5</literal></from>
+                            <to variable="priceString"/>
+                        </copy>
+                    </assign>
+                    <elseif name="priceCheckLasagna">
+                        <condition>$input.parameters/tns:dish = 'Lasagna'</condition>
+                        <assign name="setPriceLasagna">
+                            <copy>
+                                <from><literal>10.0</literal></from>
+                                <to variable="priceString"/>
+                            </copy>
+                        </assign>
+                    </elseif>
+                    <elseif name="priceCheckPizza">
+                        <condition>$input.parameters/tns:dish = 'Pizza Margarita'</condition>
+                        <assign name="setPricePizza">
+                            <copy>
+                                <from><literal>8.5</literal></from>
+                                <to variable="priceString"/>
+                            </copy>
+                        </assign>
+                    </elseif>
+                    <elseif name="priceCheckSpaghetti">
+                        <condition>$input.parameters/tns:dish = 'Spaghetti Carbonara'</condition>
+                        <assign name="setPriceSpaghetti">
+                            <copy>
+                                <from><literal>9.0</literal></from>
+                                <to variable="priceString"/>
+                            </copy>
+                        </assign>
+                    </elseif>
+                    <else>
+                        <assign name="defaultPrice">
+                            <copy>
+                                <from><literal>0.0</literal></from>
+                                <to variable="priceString"/>
+                            </copy>
+                        </assign>
+                    </else>
+                </if>
+
+
+                <assign name="setPaymentAmount">
+                    <copy>
+                        <from variable="priceString"/>
+                        <to variable="payRequest" part="parameters" query="/ps:processPayment/ps:amount"/>
+                    </copy>
+                </assign>
+
+                <invoke partnerLink="payService" portType="ps:PayService" operation="processPayment"
+                        inputVariable="payRequest" outputVariable="payResponse"/>
+            </sequence>
+
+            <sequence name="orderSequence">
+                <assign name="prepareOrderRequest">
+                    <copy>
+                        <from variable="input" part="parameters" query="/tns:OrderInput/tns:dish"/>
+                        <to variable="orderRequest" part="parameters" query="/rs:placeOrder/rs:dish"/>
+                    </copy>
+                </assign>
+
+                <invoke partnerLink="restaurantService" portType="rs:RestaurantService" operation="placeOrder"
+                        inputVariable="orderRequest" outputVariable="orderResponse"/>
+            </sequence>
+        </flow>
+
+        <assign name="composeResponse">
+            <copy>
+                <from><literal>Combined response from BPEL</literal></from>
+                <to variable="output" part="parameters"/>
+            </copy>
+        </assign>
+
+        <reply partnerLink="client" portType="tns:CustomOrderPortType" operation="processOrder"
+               variable="output"/>
+    </sequence>
+</process>
