@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://example.com/bpel/CustomOrderProcess"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+             xmlns:ps="http://payService/"
+             xmlns:rs="http://restaurant/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             targetNamespace="http://example.com/bpel/CustomOrderProcess"
+             name="CustomOrderProcess">
+
+    <types>
+        <xsd:schema targetNamespace="http://example.com/bpel/CustomOrderProcess"
+                    elementFormDefault="qualified">
+            <xsd:element name="OrderInput">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="customer" type="xsd:string"/>
+                        <xsd:element name="dish" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="OrderOutput">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="paymentMessage" type="xsd:string"/>
+                        <xsd:element name="orderMessage" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+                </xsd:element>
+
+        </xsd:schema>
+    </types>
+
+    <message name="OrderInputMessage">
+        <part name="parameters" element="tns:OrderInput"/>
+    </message>
+
+    <message name="OrderOutputMessage">
+        <part name="parameters" element="tns:OrderOutput"/>
+    </message>
+
+    <portType name="CustomOrderPortType">
+        <operation name="processOrder">
+            <input message="tns:OrderInputMessage"/>
+            <output message="tns:OrderOutputMessage"/>
+        </operation>
+    </portType>
+
+    <plnk:partnerLinkType name="ClientLinkType">
+        <plnk:role name="processRole" portType="tns:CustomOrderPortType"/>
+    </plnk:partnerLinkType>
+
+    <plnk:partnerLinkType name="PayServiceLinkType">
+        <plnk:role name="payRole" portType="ps:PayService"/>
+    </plnk:partnerLinkType>
+
+    <plnk:partnerLinkType name="RestaurantServiceLinkType">
+        <plnk:role name="restaurantRole" portType="rs:RestaurantService"/>
+    </plnk:partnerLinkType>
+
+    <service name="CustomOrderService">
+        <port name="CustomOrderPort" binding="tns:CustomOrderBinding">
+            <soap:address location="http://localhost:8080/ode/processes/CustomOrderProcess"/>
+        </port>
+    </service>
+
+    <binding name="CustomOrderBinding" type="tns:CustomOrderPortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <operation name="processOrder">
+            <soap:operation soapAction=""/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+</definitions>
