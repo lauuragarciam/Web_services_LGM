@@ -1,0 +1,10 @@
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+   <S:Body>
+      <ns2:getMenuResponse xmlns:ns2="http://restaurant/">
+         <return>Pizza Margarita - $8.5</return>
+         <return>Tiramisu - $4.5</return>
+         <return>Lasagna - $10.0</return>
+         <return>Spaghetti Carbonara - $9.0</return>
+      </ns2:getMenuResponse>
+   </S:Body>
+</S:Envelope>

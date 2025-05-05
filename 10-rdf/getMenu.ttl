@@ -1,0 +1,19 @@
+@prefix schema: <http://schema.org/> .
+@prefix ex: <https://example.org/restaurant/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:item1 a schema:MenuItem ;
+  schema:name "Pizza Margarita" ;
+  schema:price "8.5"^^xsd:decimal .
+
+ex:item2 a schema:MenuItem ;
+  schema:name "Tiramisu" ;
+  schema:price "4.5"^^xsd:decimal .
+
+ex:item3 a schema:MenuItem ;
+  schema:name "Lasagna" ;
+  schema:price "10.0"^^xsd:decimal .
+
+ex:item4 a schema:MenuItem ;
+  schema:name "Spaghetti Carbonara" ;
+  schema:price "9.0"^^xsd:decimal .

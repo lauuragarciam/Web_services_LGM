@@ -1,0 +1,42 @@
+{
+  "@context": {
+    "@base": "https://example.org/restaurant/",
+    "schema": "http://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "menu-item": "@id",
+    "type": "@type",
+    "MenuItem": "schema:MenuItem",
+    "name": "schema:name",
+    "price": {
+      "@id": "schema:price",
+      "@type": "xsd:decimal"
+    },
+    "menu-items": "@graph"
+  },
+  "menu-items": [
+    {
+      "type": "MenuItem",
+      "menu-item": "item1",
+      "name": "Pizza Margarita",
+      "price": "8.5"
+    },
+    {
+      "type": "MenuItem",
+      "menu-item": "item2",
+      "name": "Tiramisu",
+      "price": "4.5"
+    },
+    {
+      "type": "MenuItem",
+      "menu-item": "item3",
+      "name": "Lasagna",
+      "price": "10.0"
+    },
+    {
+      "type": "MenuItem",
+      "menu-item": "item4",
+      "name": "Spaghetti Carbonara",
+      "price": "9.0"
+    }
+  ]
+}
